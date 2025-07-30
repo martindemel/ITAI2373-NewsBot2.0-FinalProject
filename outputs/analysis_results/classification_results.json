@@ -1,0 +1,244 @@
+{
+  "model_performance": {
+    "naive_bayes": {
+      "accuracy": 0.9752808988764045,
+      "classification_report": {
+        "business": {
+          "precision": 0.9607843137254902,
+          "recall": 0.9607843137254902,
+          "f1-score": 0.9607843137254902,
+          "support": 102.0
+        },
+        "entertainment": {
+          "precision": 0.9620253164556962,
+          "recall": 0.987012987012987,
+          "f1-score": 0.9743589743589743,
+          "support": 77.0
+        },
+        "politics": {
+          "precision": 0.9647058823529412,
+          "recall": 0.9761904761904762,
+          "f1-score": 0.9704142011834319,
+          "support": 84.0
+        },
+        "sport": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 102.0
+        },
+        "tech": {
+          "precision": 0.987012987012987,
+          "recall": 0.95,
+          "f1-score": 0.9681528662420382,
+          "support": 80.0
+        },
+        "accuracy": 0.9752808988764045,
+        "macro avg": {
+          "precision": 0.9749056999094229,
+          "recall": 0.9747975553857907,
+          "f1-score": 0.9747420711019869,
+          "support": 445.0
+        },
+        "weighted avg": {
+          "precision": 0.9754433313388194,
+          "recall": 0.9752808988764045,
+          "f1-score": 0.9752644117402525,
+          "support": 445.0
+        }
+      }
+    },
+    "logistic_regression": {
+      "accuracy": 0.9865168539325843,
+      "classification_report": {
+        "business": {
+          "precision": 0.9803921568627451,
+          "recall": 0.9803921568627451,
+          "f1-score": 0.9803921568627451,
+          "support": 102.0
+        },
+        "entertainment": {
+          "precision": 0.9871794871794872,
+          "recall": 1.0,
+          "f1-score": 0.9935483870967742,
+          "support": 77.0
+        },
+        "politics": {
+          "precision": 0.9879518072289156,
+          "recall": 0.9761904761904762,
+          "f1-score": 0.9820359281437125,
+          "support": 84.0
+        },
+        "sport": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 102.0
+        },
+        "tech": {
+          "precision": 0.975,
+          "recall": 0.975,
+          "f1-score": 0.975,
+          "support": 80.0
+        },
+        "accuracy": 0.9865168539325843,
+        "macro avg": {
+          "precision": 0.9861046902542295,
+          "recall": 0.9863165266106442,
+          "f1-score": 0.9861952944206462,
+          "support": 445.0
+        },
+        "weighted avg": {
+          "precision": 0.9865185894832571,
+          "recall": 0.9865168539325843,
+          "f1-score": 0.986503918585446,
+          "support": 445.0
+        }
+      }
+    },
+    "svm": {
+      "accuracy": 0.9752808988764045,
+      "classification_report": {
+        "business": {
+          "precision": 0.9523809523809523,
+          "recall": 0.9803921568627451,
+          "f1-score": 0.966183574879227,
+          "support": 102.0
+        },
+        "entertainment": {
+          "precision": 0.9743589743589743,
+          "recall": 0.987012987012987,
+          "f1-score": 0.9806451612903225,
+          "support": 77.0
+        },
+        "politics": {
+          "precision": 0.9753086419753086,
+          "recall": 0.9404761904761905,
+          "f1-score": 0.9575757575757575,
+          "support": 84.0
+        },
+        "sport": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 102.0
+        },
+        "tech": {
+          "precision": 0.9746835443037974,
+          "recall": 0.9625,
+          "f1-score": 0.9685534591194969,
+          "support": 80.0
+        },
+        "accuracy": 0.9752808988764045,
+        "macro avg": {
+          "precision": 0.9753464226038066,
+          "recall": 0.9740762668703846,
+          "f1-score": 0.9745915905729609,
+          "support": 445.0
+        },
+        "weighted avg": {
+          "precision": 0.9754361969409615,
+          "recall": 0.9752808988764045,
+          "f1-score": 0.9752382975796839,
+          "support": 445.0
+        }
+      }
+    },
+    "random_forest": {
+      "accuracy": 0.9662921348314607,
+      "classification_report": {
+        "business": {
+          "precision": 0.9702970297029703,
+          "recall": 0.9607843137254902,
+          "f1-score": 0.9655172413793104,
+          "support": 102.0
+        },
+        "entertainment": {
+          "precision": 0.9868421052631579,
+          "recall": 0.974025974025974,
+          "f1-score": 0.9803921568627451,
+          "support": 77.0
+        },
+        "politics": {
+          "precision": 0.9506172839506173,
+          "recall": 0.9166666666666666,
+          "f1-score": 0.9333333333333333,
+          "support": 84.0
+        },
+        "sport": {
+          "precision": 0.9714285714285714,
+          "recall": 1.0,
+          "f1-score": 0.9855072463768116,
+          "support": 102.0
+        },
+        "tech": {
+          "precision": 0.9512195121951219,
+          "recall": 0.975,
+          "f1-score": 0.9629629629629629,
+          "support": 80.0
+        },
+        "accuracy": 0.9662921348314607,
+        "macro avg": {
+          "precision": 0.9660809005080878,
+          "recall": 0.9652953908836261,
+          "f1-score": 0.9655425881830327,
+          "support": 445.0
+        },
+        "weighted avg": {
+          "precision": 0.9662747556138022,
+          "recall": 0.9662921348314607,
+          "f1-score": 0.9661387210485232,
+          "support": 445.0
+        }
+      }
+    }
+  },
+  "best_model": "logistic_regression",
+  "best_accuracy": 0.9865168539325843,
+  "ensemble_accuracy": 0.9820224719101124,
+  "confusion_matrix": [
+    [
+      100,
+      1,
+      1,
+      0,
+      0
+    ],
+    [
+      0,
+      77,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      82,
+      0,
+      2
+    ],
+    [
+      0,
+      0,
+      0,
+      102,
+      0
+    ],
+    [
+      2,
+      0,
+      0,
+      0,
+      78
+    ]
+  ],
+  "categories": [
+    "sport",
+    "politics",
+    "entertainment",
+    "business",
+    "tech"
+  ],
+  "timestamp": "2025-07-30T16:25:06.080172"
+}

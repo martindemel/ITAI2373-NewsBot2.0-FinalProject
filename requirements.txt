@@ -1,0 +1,42 @@
+# NewsBot Intelligence System - Requirements
+# Updated for myenv3.10 compatibility
+
+# Core Data Processing
+pandas>=2.0.3
+numpy>=1.26.4
+matplotlib>=3.7.2
+seaborn>=0.13.1
+
+# Machine Learning
+scikit-learn>=1.7.1
+scipy>=1.13.1
+
+# NLP Libraries
+nltk>=3.9.1
+spacy>=3.8.4
+textblob>=0.19.0
+vaderSentiment>=3.3.2
+
+# Visualization & Interactive
+plotly>=6.2.0
+wordcloud>=1.9.4
+streamlit>=1.42.2
+
+# Jupyter Environment
+jupyter>=1.1.1
+jupyterlab>=4.3.4
+ipywidgets>=8.1.5
+notebook>=7.3.2
+
+# Advanced Analysis (Bonus Features)
+umap-learn>=0.5.9
+networkx>=3.4.2
+tqdm>=4.67.1
+
+# Utility Libraries
+requests>=2.32.3
+pyarrow>=18.1.0
+pydantic>=2.10.3
+jinja2>=3.1.4
+packaging>=24.2
+typing-extensions>=4.12.2 

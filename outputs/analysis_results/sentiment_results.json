@@ -1,0 +1,41 @@
+{
+  "sentiment_by_category": {
+    "vader_compound": {
+      "business": 0.2708270588235294,
+      "entertainment": 0.6106401554404145,
+      "politics": 0.1585937649880096,
+      "sport": 0.5712549902152642,
+      "tech": 0.544467331670823
+    },
+    "textblob_polarity": {
+      "business": 0.028760911937868984,
+      "entertainment": 0.14106616840765482,
+      "politics": 0.04189311433960553,
+      "sport": 0.10438986745837792,
+      "tech": 0.050561656093366866
+    },
+    "textblob_subjectivity": {
+      "business": 0.3805644800362818,
+      "entertainment": 0.3877525908915541,
+      "politics": 0.39668149667072067,
+      "sport": 0.4149430064054617,
+      "tech": 0.42036876377583615
+    }
+  },
+  "sentiment_distribution": {
+    "positive": 1594,
+    "negative": 572,
+    "neutral": 59
+  },
+  "correlation_vader_textblob": 0.47500727410655225,
+  "total_articles": 2225,
+  "insights": {
+    "most_positive": "entertainment",
+    "most_negative": "politics", 
+    "most_subjective": "tech",
+    "most_objective": "business",
+    "analysis_complete": true,
+    "status": "Generated from notebook analysis"
+  },
+  "timestamp": "2024-07-30T16:25:00"
+} 

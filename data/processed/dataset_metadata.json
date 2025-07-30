@@ -1,0 +1,13 @@
+{
+  "total_articles": 2225,
+  "categories": {
+    "sport": 511,
+    "business": 510,
+    "politics": 417,
+    "tech": 401,
+    "entertainment": 386
+  },
+  "average_article_length": 2262.936179775281,
+  "dataset_source": "data/raw/bbc_news_raw.csv",
+  "processing_date": "2025-07-30T18:28:43.405278"
+}
