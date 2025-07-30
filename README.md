@@ -19,8 +19,13 @@ This single command automatically:
 
 **Course:** ITAI2373 - Natural Language Processing  
 **Project:** Mid-term Group Project  
-**Team:** [Martin Demel](https://github.com/martindemel) & [Jiri Musil](https://github.com/jirimusil)  
+**Team:** [Martin Demel](https://github.com/martindemel) & [Jiri Musil](https://github.com/JiriCZTX)  
 **Date:** 2025
+
+## Team Repositories
+
+- **Martin Demel's Repository:** [https://github.com/martindemel/ITAI2373-NewsBot-Midterm.git](https://github.com/martindemel/ITAI2373-NewsBot-Midterm.git)
+- **Jiri Musil's Repository:** [https://github.com/JiriCZTX/ITAI2373-NewsBot-Midterm.git](https://github.com/JiriCZTX/ITAI2373-NewsBot-Midterm.git)
 
 ---
 
@@ -322,7 +327,7 @@ This project is developed for academic purposes as part of the ITAI2373 NLP cour
 
 ### Team Members
 - **[Martin Demel](https://github.com/martindemel)**
-- **[Jiri Musil](https://github.com/jirimusil)** 
+- **[Jiri Musil](https://github.com/JiriCZTX)** 
 
 ---
 
