@@ -1,6 +1,8 @@
 # NewsBot Intelligence System
 ## Advanced News Analysis Platform Using Natural Language Processing
 
+![NewsBot Intelligence System](mainimage.png)
+
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?logo=streamlit&logoColor=white)](https://streamlit.io)
@@ -44,7 +46,7 @@ NewsBot Intelligence System is a comprehensive NLP platform that analyzes news a
 
 ## Features & Capabilities
 
-### Core NLP Modules (Required)
+### Core NLP Modules
 
 | Module | Feature | Implementation |
 |--------|---------|---------------|
@@ -57,15 +59,15 @@ NewsBot Intelligence System is a comprehensive NLP platform that analyzes news a
 | **Module 7** | Multi-Class Classification | Advanced ML pipeline with ensemble |
 | **Module 8** | Named Entity Recognition | Entity extraction and relationship mapping |
 
-### Bonus Features (35+ Points)
+### Bonus Features
 
-| Feature | Points | Status |
-|---------|--------|--------|
-| **Interactive Dashboard** | 5 pts | Streamlit web application |
-| **Advanced Analysis** | 5 pts | Topic modeling, clustering, UMAP |
-| **Custom Models** | 5 pts | Domain-specific fine-tuning |
-| **Research Extension** | 10 pts | Novel NLP techniques |
-| **Video Demonstration** | 10 pts | Professional presentation |
+| Feature | Description |
+|---------|-------------|
+| **Interactive Dashboard** | Streamlit web application |
+| **Advanced Analysis** | Topic modeling, clustering, UMAP |
+| **Custom Models** | Domain-specific fine-tuning |
+| **Research Extension** | Novel NLP techniques |
+| **Video Demonstration** | Professional presentation |
 
 ---
 
