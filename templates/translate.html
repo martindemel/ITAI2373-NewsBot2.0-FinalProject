@@ -1,0 +1,253 @@
+{% extends "base.html" %}
+
+{% block title %}Translation - NewsBot 2.0{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">
+        <i class="fas fa-language"></i> Multilingual Translation
+    </h1>
+</div>
+
+<div id="error-container"></div>
+<div id="success-container"></div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-edit"></i> Source Text
+                </h5>
+            </div>
+            <div class="card-body">
+                <form id="translationForm">
+                    <div class="mb-3">
+                        <label for="sourceText" class="form-label">Text to Translate</label>
+                        <textarea class="form-control" id="sourceText" name="text" rows="10" 
+                            placeholder="Enter text to translate..."></textarea>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="sourceLanguage" class="form-label">From</label>
+                                <select class="form-select" id="sourceLanguage">
+                                    <option value="auto">Auto-detect</option>
+                                    <option value="en">English</option>
+                                    <option value="es">Spanish</option>
+                                    <option value="fr">French</option>
+                                    <option value="de">German</option>
+                                    <option value="zh">Chinese</option>
+                                    <option value="ja">Japanese</option>
+                                    <option value="ar">Arabic</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="targetLanguage" class="form-label">To</label>
+                                <select class="form-select" id="targetLanguage" name="target_language">
+                                    <option value="en">English</option>
+                                    <option value="es">Spanish</option>
+                                    <option value="fr">French</option>
+                                    <option value="de">German</option>
+                                    <option value="zh">Chinese</option>
+                                    <option value="ja">Japanese</option>
+                                    <option value="ar">Arabic</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-exchange-alt"></i> Translate
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-check"></i> Translation Result
+                </h5>
+            </div>
+            <div class="card-body">
+                <div id="translationResult" class="mb-3" style="min-height: 200px; display: none;">
+                    <div class="translation-text p-3 border rounded bg-light">
+                        <div id="translatedText"></div>
+                    </div>
+                    <div class="translation-info mt-3">
+                        <div id="translationMetadata"></div>
+                    </div>
+                </div>
+                
+                <div id="translationLoading" class="text-center py-4 loading-spinner">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Translating...</span>
+                    </div>
+                    <p class="mt-2">Processing translation...</p>
+                </div>
+                
+                <div id="noTranslation" class="text-center text-muted py-5">
+                    <i class="fas fa-language fa-3x mb-3"></i>
+                    <p>Translation will appear here</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Language Support Info -->
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-globe"></i> Supported Languages
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-3">NewsBot 2.0 supports translation between 50+ languages using advanced neural machine translation:</p>
+                <div class="row">
+                    <div class="col-md-3">
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-success"></i> English</li>
+                            <li><i class="fas fa-check text-success"></i> Spanish</li>
+                            <li><i class="fas fa-check text-success"></i> French</li>
+                            <li><i class="fas fa-check text-success"></i> German</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-3">
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-success"></i> Chinese</li>
+                            <li><i class="fas fa-check text-success"></i> Japanese</li>
+                            <li><i class="fas fa-check text-success"></i> Korean</li>
+                            <li><i class="fas fa-check text-success"></i> Arabic</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-3">
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-success"></i> Portuguese</li>
+                            <li><i class="fas fa-check text-success"></i> Italian</li>
+                            <li><i class="fas fa-check text-success"></i> Russian</li>
+                            <li><i class="fas fa-check text-success"></i> Hindi</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-3">
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-success"></i> Turkish</li>
+                            <li><i class="fas fa-check text-success"></i> Dutch</li>
+                            <li><i class="fas fa-check text-success"></i> Swedish</li>
+                            <li><i class="fas fa-plus text-muted"></i> And many more...</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('translationForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const sourceText = document.getElementById('sourceText').value.trim();
+    const targetLanguage = document.getElementById('targetLanguage').value;
+    
+    if (!sourceText) {
+        showError('Please enter text to translate.');
+        return;
+    }
+    
+    translateText(sourceText, targetLanguage);
+});
+
+function translateText(text, targetLanguage) {
+    showLoading('translationLoading');
+    document.getElementById('translationResult').style.display = 'none';
+    document.getElementById('noTranslation').style.display = 'none';
+    
+    fetch('/translate', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            text: text,
+            target_language: targetLanguage
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideLoading('translationLoading');
+        
+        if (data.error) {
+            showError(data.error);
+            document.getElementById('noTranslation').style.display = 'block';
+            return;
+        }
+        
+        displayTranslation(data);
+        showSuccess('Translation completed successfully!');
+    })
+    .catch(error => {
+        hideLoading('translationLoading');
+        showError('Error translating text: ' + error.message);
+        document.getElementById('noTranslation').style.display = 'block';
+    });
+}
+
+function displayTranslation(data) {
+    console.log('Translation data:', data); // Debug log
+    const translatedText = data.translated_text || 'No translation available';
+    document.getElementById('translatedText').innerHTML = translatedText;
+    
+    document.getElementById('translationMetadata').innerHTML = `
+        <div class="row">
+            <div class="col-md-4">
+                <small class="text-muted">Source Language:</small><br>
+                <strong>${getLanguageName(data.source_language)}</strong>
+            </div>
+            <div class="col-md-4">
+                <small class="text-muted">Target Language:</small><br>
+                <strong>${getLanguageName(data.target_language)}</strong>
+            </div>
+            <div class="col-md-4">
+                <small class="text-muted">Confidence:</small><br>
+                <strong>${(data.confidence * 100).toFixed(1)}%</strong>
+            </div>
+        </div>
+        <hr>
+        <small class="text-muted">Translated at: ${new Date(data.timestamp).toLocaleString()}</small>
+    `;
+    
+    document.getElementById('translationResult').style.display = 'block';
+}
+
+function getLanguageName(code) {
+    const languages = {
+        'en': 'English',
+        'es': 'Spanish', 
+        'fr': 'French',
+        'de': 'German',
+        'zh': 'Chinese',
+        'ja': 'Japanese',
+        'ar': 'Arabic',
+        'pt': 'Portuguese',
+        'it': 'Italian',
+        'ru': 'Russian',
+        'hi': 'Hindi',
+        'auto': 'Auto-detected'
+    };
+    return languages[code] || code.toUpperCase();
+}
+</script>
+{% endblock %}

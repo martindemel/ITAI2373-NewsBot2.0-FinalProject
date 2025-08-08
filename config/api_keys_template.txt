@@ -1,0 +1,39 @@
+# NewsBot 2.0 API Keys Configuration Template
+# Copy this file to .env and fill in your actual API keys
+
+# OpenAI API Key (Required for advanced language understanding)
+# Get your key from: https://platform.openai.com/api-keys
+OPENAI_API_KEY=your-openai-api-key-here
+
+# Google Cloud Translation API Key (Optional - for translation services)
+# Get your key from: https://cloud.google.com/translate/docs/setup
+GOOGLE_TRANSLATE_API_KEY=your-google-translate-api-key-here
+
+# Azure Translator API Key (Optional - alternative translation service)
+# Get your key from: https://azure.microsoft.com/en-us/services/cognitive-services/translator/
+AZURE_TRANSLATE_KEY=your-azure-translate-key-here
+
+# Hugging Face API Key (Optional - for additional model access)
+# Get your key from: https://huggingface.co/settings/tokens
+HUGGINGFACE_API_KEY=your-huggingface-api-key-here
+
+# System Configuration
+DEBUG=false
+LOG_LEVEL=INFO
+HOST=0.0.0.0
+PORT=5000
+
+# Security
+SECRET_KEY=your-super-secret-key-for-production
+FLASK_DEBUG=false
+
+# Data Paths (Optional - defaults provided)
+DATA_PATH=data/processed/newsbot_dataset.csv
+MODELS_PATH=data/models/
+
+# Important Notes:
+# 1. Never commit actual API keys to version control
+# 2. Keep your .env file secure and private
+# 3. OpenAI API key is required for full functionality
+# 4. Other API keys are optional but enable additional features
+# 5. Replace 'your-*-key-here' with your actual API keys

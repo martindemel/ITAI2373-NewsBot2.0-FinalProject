@@ -1,3 +1,16 @@
+# NewsBot 2.0 .gitignore
+# CRITICAL: Security files with API keys
+
+# Environment variables and API keys
+.env
+.env.local
+.env.production
+config/api_keys.txt
+config/api_keys.json
+*.key
+*_key.txt
+*_keys.txt
+
 # Python
 __pycache__/
 *.py[cod]
@@ -23,22 +36,20 @@ share/python-wheels/
 *.egg
 MANIFEST
 
-# Virtual Environment
-newsbot_env/
+# Virtual environments
 venv/
 env/
 ENV/
+newsbot_env/
+myenv*/
+*.venv
 
-# Jupyter Notebook
-.ipynb_checkpoints
-
-# PyCharm
-.idea/
-
-# VS Code
+# IDE and editors
 .vscode/
-
-# OS
+.idea/
+*.swp
+*.swo
+*~
 .DS_Store
 .DS_Store?
 ._*
@@ -47,21 +58,48 @@ ENV/
 ehthumbs.db
 Thumbs.db
 
+# Logs and databases
+*.log
+*.db
+*.sqlite
+*.sqlite3
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Model files (if too large)
+*.pkl.large
+*.model.large
+data/models/*.large
+
 # Temporary files
 *.tmp
 *.temp
+temp/
+tmp/
 
-# Logs
-*.log
+# Backup files
+backup_removed_files/
 
-# Data files that might be large or sensitive
-# data/raw/*.csv (uncomment if you don't want to track raw data)
-# data/processed/*.csv (uncomment if you don't want to track processed data)
+# OS generated files
+Icon?
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 
-# Model files that might be large
-*.pkl
-*.model
-*.h5
+# Application specific
+uploads/*
+!uploads/.gitkeep
+cache/
+*.cache
 
-# Environment variables
-.env
+# Security - Never commit these patterns
+*secret*
+*password*
+*token*
+*credential*
+

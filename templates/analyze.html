@@ -1,0 +1,312 @@
+{% extends "base.html" %}
+
+{% block title %}Analyze Article - NewsBot 2.0{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">
+        <i class="fas fa-search"></i> Article Analysis
+    </h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="clearAnalysis()">
+            <i class="fas fa-trash"></i> Clear
+        </button>
+    </div>
+</div>
+
+<div id="error-container"></div>
+<div id="success-container"></div>
+
+<div class="row">
+    <!-- Input Section -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-edit"></i> Article Input
+                </h5>
+            </div>
+            <div class="card-body">
+                <form id="analysisForm">
+                    <div class="mb-3">
+                        <label for="articleText" class="form-label">Article Text</label>
+                        <textarea 
+                            class="form-control" 
+                            id="articleText" 
+                            name="text" 
+                            rows="15" 
+                            placeholder="Paste your article text here for comprehensive NLP analysis..."></textarea>
+                        <div class="form-text">
+                            The system will analyze sentiment, extract entities, classify content, generate topics, and create summaries.
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-brain"></i> Analyze with AI
+                        </button>
+                    </div>
+                </form>
+                
+                <!-- Loading Spinner -->
+                <div id="loadingSpinner" class="text-center py-4 loading-spinner">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Analyzing...</span>
+                    </div>
+                    <p class="mt-2">Processing with advanced NLP models...</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Example Articles -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-lightbulb"></i> Example Articles
+                </h6>
+            </div>
+            <div class="card-body">
+                <button type="button" class="btn btn-sm btn-outline-primary me-2 mb-2" onclick="loadExample('tech')">
+                    Tech News
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-success me-2 mb-2" onclick="loadExample('business')">
+                    Business
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-info me-2 mb-2" onclick="loadExample('sports')">
+                    Sports
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-warning me-2 mb-2" onclick="loadExample('politics')">
+                    Politics
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Results Section -->
+    <div class="col-md-6">
+        <div id="resultsContainer" style="display: none;">
+            <!-- Classification Results -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-tags"></i> Classification
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="classificationResult"></div>
+                </div>
+            </div>
+            
+            <!-- Sentiment Analysis -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-heart"></i> Sentiment Analysis
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="sentimentResult"></div>
+                </div>
+            </div>
+            
+            <!-- Named Entity Recognition -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user-friends"></i> Named Entities
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="entitiesResult"></div>
+                </div>
+            </div>
+            
+            <!-- Topic Modeling -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-line"></i> Topics
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="topicsResult"></div>
+                </div>
+            </div>
+            
+            <!-- Text Summary -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-compress-alt"></i> Summary
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="summaryResult"></div>
+                </div>
+            </div>
+            
+            <!-- Language Detection -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-language"></i> Language
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="languageResult"></div>
+                </div>
+            </div>
+            
+            <!-- Analysis Metadata -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle"></i> Analysis Metadata
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="metadataResult"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Example articles for demonstration
+const exampleArticles = {
+    tech: `Artificial intelligence continues to revolutionize industries across the globe. Recent breakthroughs in natural language processing have enabled machines to understand and generate human-like text with unprecedented accuracy. Companies are now integrating AI-powered chatbots and virtual assistants into their customer service operations, resulting in improved efficiency and customer satisfaction. The development of large language models has opened new possibilities for automated content generation, translation, and analysis.`,
+    
+    business: `Global markets experienced significant volatility today as investors reacted to new economic data and policy announcements. Technology stocks led the decline, falling by 3.2% amid concerns about rising interest rates and inflation. Meanwhile, energy and healthcare sectors showed resilience, posting modest gains. Analysts suggest that market uncertainty may persist in the coming weeks as traders await further guidance from central banks regarding monetary policy adjustments.`,
+    
+    sports: `In a thrilling championship match, the home team secured a decisive 3-1 victory against their longtime rivals. The game featured exceptional performances from both goalkeepers, with multiple spectacular saves that kept the crowd on the edge of their seats. The winning goal came in the 78th minute from a brilliant free kick that curved perfectly into the top corner. This victory marks the team's first championship in over a decade and sets up an exciting playoff scenario.`,
+    
+    politics: `Congressional leaders announced a bipartisan agreement on infrastructure spending that aims to modernize the nation's transportation networks and digital infrastructure. The proposed legislation includes substantial investments in renewable energy projects and broadband expansion to underserved communities. Supporters argue that these investments will create jobs and enhance economic competitiveness, while critics raise concerns about the fiscal impact and implementation timeline.`
+};
+
+// Form submission handler
+document.getElementById('analysisForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const articleText = document.getElementById('articleText').value.trim();
+    if (!articleText) {
+        showError('Please enter article text for analysis.');
+        return;
+    }
+    
+    analyzeArticle(articleText);
+});
+
+function analyzeArticle(text) {
+    showLoading('loadingSpinner');
+    document.getElementById('resultsContainer').style.display = 'none';
+    
+    fetch('/analyze', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: text })
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideLoading('loadingSpinner');
+        
+        if (data.error) {
+            showError(data.error);
+            return;
+        }
+        
+        displayResults(data);
+        showSuccess('Analysis completed successfully!');
+    })
+    .catch(error => {
+        hideLoading('loadingSpinner');
+        showError('Error analyzing article: ' + error.message);
+        console.error('Error:', error);
+    });
+}
+
+function displayResults(data) {
+    // Classification
+    if (data.classification) {
+        const classification = data.classification;
+        document.getElementById('classificationResult').innerHTML = `
+            <div class="d-flex justify-content-between align-items-center">
+                <span class="h5 mb-0">${classification.category || classification.predicted_category || 'Unknown'}</span>
+                <span class="badge bg-primary">${((classification.confidence_score || classification.confidence || classification.max_probability || 0) * 100).toFixed(1)}%</span>
+            </div>
+            <div class="progress mt-2">
+                <div class="progress-bar" role="progressbar" style="width: ${(classification.confidence_score || classification.confidence || classification.max_probability || 0) * 100}%"></div>
+            </div>
+        `;
+    }
+    
+    // Sentiment
+    if (data.sentiment) {
+        document.getElementById('sentimentResult').innerHTML = formatSentiment(data.sentiment);
+    }
+    
+    // Entities
+    if (data.entities) {
+        document.getElementById('entitiesResult').innerHTML = formatEntities(data.entities);
+    }
+    
+    // Topics
+    if (data.topics) {
+        document.getElementById('topicsResult').innerHTML = formatTopics(data.topics);
+    }
+    
+    // Summary
+    if (data.summary) {
+        document.getElementById('summaryResult').innerHTML = `
+            <div class="analysis-result">
+                <p class="mb-0">${data.summary}</p>
+            </div>
+        `;
+    }
+    
+    // Language
+    if (data.language) {
+        const lang = data.language;
+        document.getElementById('languageResult').innerHTML = `
+            <div class="d-flex justify-content-between align-items-center">
+                <span><strong>${lang.language_name || lang.language || 'Unknown'}</strong></span>
+                <span class="badge bg-info">${((lang.confidence || 0) * 100).toFixed(1)}% confidence</span>
+            </div>
+        `;
+    }
+    
+    // Metadata
+    document.getElementById('metadataResult').innerHTML = `
+        <div class="row">
+            <div class="col-6">
+                <small class="text-muted">Text Length:</small><br>
+                <strong>${data.text_length || 0} characters</strong>
+            </div>
+            <div class="col-6">
+                <small class="text-muted">Word Count:</small><br>
+                <strong>${data.word_count || 0} words</strong>
+            </div>
+        </div>
+        <hr>
+        <small class="text-muted">Analysis completed at: ${new Date(data.timestamp).toLocaleString()}</small>
+    `;
+    
+    document.getElementById('resultsContainer').style.display = 'block';
+}
+
+function loadExample(category) {
+    document.getElementById('articleText').value = exampleArticles[category] || '';
+}
+
+function clearAnalysis() {
+    document.getElementById('articleText').value = '';
+    document.getElementById('resultsContainer').style.display = 'none';
+    document.getElementById('error-container').innerHTML = '';
+    document.getElementById('success-container').innerHTML = '';
+}
+</script>
+{% endblock %}

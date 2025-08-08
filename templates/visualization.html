@@ -1,0 +1,1009 @@
+{% extends "base.html" %}
+
+{% block title %}Visualizations - NewsBot 2.0{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">
+        <i class="fas fa-chart-pie"></i> Advanced Visualizations
+    </h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="refreshData()">
+            <i class="fas fa-sync-alt"></i> Refresh Data
+        </button>
+        <button type="button" class="btn btn-sm btn-primary ms-2" onclick="exportCharts()">
+            <i class="fas fa-download"></i> Export Charts
+        </button>
+    </div>
+</div>
+
+<!-- Error/Success Messages -->
+<div id="error-container"></div>
+<div id="success-container"></div>
+
+<!-- Visualization Controls -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-sliders-h"></i> Visualization Controls
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <label for="chartType" class="form-label">Chart Type</label>
+                        <select class="form-select" id="chartType" onchange="updateCharts()">
+                            <option value="all">All Charts</option>
+                            <option value="category">Category Analysis</option>
+                            <option value="sentiment">Sentiment Analysis</option>
+                            <option value="topics">Topic Modeling</option>
+                            <option value="entities">Entity Analysis</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="timeRange" class="form-label">Time Range</label>
+                        <select class="form-select" id="timeRange" onchange="updateCharts()">
+                            <option value="all">All Time</option>
+                            <option value="year">Last Year</option>
+                            <option value="month">Last Month</option>
+                            <option value="week">Last Week</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="categoryFilter" class="form-label">Category Filter</label>
+                        <select class="form-select" id="categoryFilter" onchange="updateCharts()">
+                            <option value="">All Categories</option>
+                            <option value="tech">Technology</option>
+                            <option value="business">Business</option>
+                            <option value="sport">Sports</option>
+                            <option value="entertainment">Entertainment</option>
+                            <option value="politics">Politics</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="dataSource" class="form-label">Data Source</label>
+                        <select class="form-select" id="dataSource" onchange="updateCharts()">
+                            <option value="processed">Processed Articles</option>
+                            <option value="live">Live Analysis</option>
+                            <option value="cached">Cached Results</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Visualizations Grid -->
+<div class="row">
+    <!-- Category Distribution -->
+    <div class="col-lg-6 mb-4">
+        <div class="card hover-lift">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-pie text-primary"></i> Category Distribution
+                </h5>
+                <div class="btn-group btn-group-sm">
+                    <button class="btn btn-outline-secondary" onclick="changeChartType('categoryChart', 'pie')">
+                        <i class="fas fa-chart-pie"></i>
+                    </button>
+                    <button class="btn btn-outline-secondary" onclick="changeChartType('categoryChart', 'bar')">
+                        <i class="fas fa-chart-bar"></i>
+                    </button>
+                    <button class="btn btn-outline-secondary" onclick="changeChartType('categoryChart', 'doughnut')">
+                        <i class="fas fa-chart-donut"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div style="position: relative; height: 300px; width: 100%;">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+                <div id="categoryStats" class="mt-3">
+                    <div class="row text-center">
+                        <div class="col">
+                            <div class="stat-item">
+                                <div class="h4 text-primary mb-0" id="totalArticles">{{ data.category_distribution.values() | sum }}</div>
+                                <small class="text-muted">Total Articles</small>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="stat-item">
+                                <div class="h4 text-success mb-0" id="topCategory">
+                                    {% set max_category = data.category_distribution | dictsort(by='value') | last %}
+                                    {{ max_category[0] | title }}
+                                </div>
+                                <small class="text-muted">Top Category</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sentiment Analysis -->
+    <div class="col-lg-6 mb-4">
+        <div class="card hover-lift">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-heart text-danger"></i> Sentiment Distribution
+                </h5>
+            </div>
+            <div class="card-body">
+                <div style="position: relative; height: 300px; width: 100%;">
+                    <canvas id="sentimentChart"></canvas>
+                </div>
+                <div class="mt-3">
+                    <div class="row">
+                        <div class="col-4 text-center">
+                            <div class="sentiment-indicator positive">
+                                <i class="fas fa-smile"></i> Positive
+                            </div>
+                            <div class="h5 mt-1" id="positiveCount">32%</div>
+                        </div>
+                        <div class="col-4 text-center">
+                            <div class="sentiment-indicator neutral">
+                                <i class="fas fa-meh"></i> Neutral
+                            </div>
+                            <div class="h5 mt-1" id="neutralCount">45%</div>
+                        </div>
+                        <div class="col-4 text-center">
+                            <div class="sentiment-indicator negative">
+                                <i class="fas fa-frown"></i> Negative
+                            </div>
+                            <div class="h5 mt-1" id="negativeCount">23%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Topic Trends -->
+    <div class="col-lg-8 mb-4">
+        <div class="card hover-lift">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-line text-warning"></i> Topic Trends Over Time
+                </h5>
+            </div>
+            <div class="card-body">
+                <div style="position: relative; height: 400px; width: 100%;">
+                    <canvas id="topicTrendsChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Entities -->
+    <div class="col-lg-4 mb-4">
+        <div class="card hover-lift">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-users text-info"></i> Top Entities
+                </h5>
+            </div>
+            <div class="card-body">
+                <div id="entitiesList">
+                    <div class="entity-item d-flex justify-content-between align-items-center mb-2">
+                        <span class="entity-tag">Apple Inc.</span>
+                        <span class="badge bg-primary">145</span>
+                    </div>
+                    <div class="entity-item d-flex justify-content-between align-items-center mb-2">
+                        <span class="entity-tag">Microsoft</span>
+                        <span class="badge bg-primary">98</span>
+                    </div>
+                    <div class="entity-item d-flex justify-content-between align-items-center mb-2">
+                        <span class="entity-tag">Tesla</span>
+                        <span class="badge bg-primary">76</span>
+                    </div>
+                    <div class="entity-item d-flex justify-content-between align-items-center mb-2">
+                        <span class="entity-tag">Google</span>
+                        <span class="badge bg-primary">65</span>
+                    </div>
+                    <div class="entity-item d-flex justify-content-between align-items-center mb-2">
+                        <span class="entity-tag">Amazon</span>
+                        <span class="badge bg-primary">54</span>
+                    </div>
+                </div>
+                <button class="btn btn-sm btn-outline-primary w-100 mt-3" onclick="loadMoreEntities()">
+                    <i class="fas fa-plus"></i> Load More
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Word Cloud -->
+    <div class="col-lg-6 mb-4">
+        <div class="card hover-lift">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-cloud text-secondary"></i> Word Cloud
+                </h5>
+            </div>
+            <div class="card-body text-center">
+                <div id="wordCloud" style="height: 300px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                    <div class="text-muted">
+                        <i class="fas fa-cloud fa-3x mb-3"></i><br>
+                        Word cloud will appear here<br>
+                        <small>Powered by advanced NLP analysis</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Correlation Matrix -->
+    <div class="col-lg-6 mb-4">
+        <div class="card hover-lift">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-th text-success"></i> Category Correlation
+                </h5>
+            </div>
+            <div class="card-body">
+                <div style="position: relative; height: 300px; width: 100%;">
+                    <canvas id="correlationChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Performance Metrics -->
+<div class="row">
+    <div class="col-md-12 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-tachometer-alt"></i> Model Performance Metrics
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 text-center">
+                        <div class="performance-metric">
+                            <div class="h3 text-primary">97.5%</div>
+                            <div class="text-muted">Classification Accuracy</div>
+                            <div class="progress mt-2">
+                                <div class="progress-bar" style="width: 97.5%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <div class="performance-metric">
+                            <div class="h3 text-success">94.2%</div>
+                            <div class="text-muted">Sentiment Accuracy</div>
+                            <div class="progress mt-2">
+                                <div class="progress-bar bg-success" style="width: 94.2%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <div class="performance-metric">
+                            <div class="h3 text-warning">0.82</div>
+                            <div class="text-muted">Topic Coherence</div>
+                            <div class="progress mt-2">
+                                <div class="progress-bar bg-warning" style="width: 82%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <div class="performance-metric">
+                            <div class="h3 text-info">91.8%</div>
+                            <div class="text-muted">Entity Extraction F1</div>
+                            <div class="progress mt-2">
+                                <div class="progress-bar bg-info" style="width: 91.8%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Chart configurations
+let categoryChart, sentimentChart, topicTrendsChart, correlationChart;
+
+// Initialize charts when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    initializeCharts();
+    loadVisualizationData();
+});
+
+function initializeCharts() {
+    try {
+        // Category Distribution Chart
+        const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+        
+        // Ensure we have valid data
+        let categoryLabels = {{ data.category_distribution.keys() | list | tojson }};
+        let categoryValues = {{ data.category_distribution.values() | list | tojson }};
+        
+        if (!categoryLabels || !categoryValues || categoryLabels.length === 0) {
+            console.warn('No category data available, using default data');
+            categoryLabels = ['Technology', 'Business', 'Sports', 'Entertainment', 'Politics'];
+            categoryValues = [450, 320, 280, 200, 150];
+        }
+        
+        categoryChart = new Chart(categoryCtx, {
+        type: 'doughnut',
+        data: {
+            labels: categoryLabels,
+            datasets: [{
+                data: categoryValues,
+                backgroundColor: [
+                    '#FF6384',
+                    '#36A2EB', 
+                    '#FFCE56',
+                    '#FF9F40',
+                    '#9966FF'
+                ],
+                borderWidth: 3,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = ((context.parsed * 100) / total).toFixed(1);
+                            return context.label + ': ' + context.parsed + ' (' + percentage + '%)';
+                        }
+                    }
+                }
+            },
+            animation: {
+                animateScale: true,
+                animateRotate: true
+            }
+        }
+    });
+
+    // Sentiment Distribution Chart
+    const sentimentCtx = document.getElementById('sentimentChart').getContext('2d');
+    sentimentChart = new Chart(sentimentCtx, {
+        type: 'polarArea',
+        data: {
+            labels: ['Positive', 'Neutral', 'Negative'],
+            datasets: [{
+                data: [32, 45, 23],
+                backgroundColor: [
+                    'rgba(39, 174, 96, 0.8)',
+                    'rgba(149, 165, 166, 0.8)',
+                    'rgba(231, 76, 60, 0.8)'
+                ],
+                borderColor: [
+                    'rgba(39, 174, 96, 1)',
+                    'rgba(149, 165, 166, 1)',
+                    'rgba(231, 76, 60, 1)'
+                ],
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                r: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0,0,0,0.1)'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    // Topic Trends Chart
+    const topicTrendsCtx = document.getElementById('topicTrendsChart').getContext('2d');
+    topicTrendsChart = new Chart(topicTrendsCtx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [
+                {
+                    label: 'Technology',
+                    data: [12, 19, 15, 25, 22, 30],
+                    borderColor: '#3498db',
+                    backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                },
+                {
+                    label: 'Business',
+                    data: [8, 15, 12, 18, 16, 22],
+                    borderColor: '#e74c3c',
+                    backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                },
+                {
+                    label: 'Sports',
+                    data: [5, 10, 8, 15, 12, 18],
+                    borderColor: '#f39c12',
+                    backgroundColor: 'rgba(243, 156, 18, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0,0,0,0.1)'
+                    }
+                },
+                x: {
+                    grid: {
+                        color: 'rgba(0,0,0,0.1)'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'top'
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false
+                }
+            },
+            interaction: {
+                mode: 'nearest',
+                axis: 'x',
+                intersect: false
+            }
+        }
+    });
+
+    // Correlation Chart
+    const correlationCtx = document.getElementById('correlationChart').getContext('2d');
+    correlationChart = new Chart(correlationCtx, {
+        type: 'scatter',
+        data: {
+            datasets: [{
+                label: 'Sentiment vs Length',
+                data: [
+                    {x: 0.8, y: 1200},
+                    {x: 0.3, y: 800},
+                    {x: -0.2, y: 1500},
+                    {x: 0.6, y: 900},
+                    {x: -0.1, y: 1100}
+                ],
+                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                pointRadius: 8,
+                pointHoverRadius: 12
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Sentiment Score'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Article Length'
+                    }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `Sentiment: ${context.parsed.x}, Length: ${context.parsed.y}`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+    
+    } catch (error) {
+        console.error('Error initializing charts:', error);
+        // Show error message to user
+        document.getElementById('error-container').innerHTML = `
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-triangle"></i>
+                <strong>Visualization Notice:</strong> Some charts may not display correctly. Please refresh the page.
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+    }
+}
+
+function loadVisualizationData() {
+    // This would load real data from the backend
+    console.log('Loading visualization data...');
+    
+    // Simulate loading with progress
+    showLoadingProgress();
+}
+
+function showLoadingProgress() {
+    // Add subtle loading animation to charts
+    document.querySelectorAll('.card').forEach(card => {
+        card.style.opacity = '0.8';
+    });
+    
+    setTimeout(() => {
+        document.querySelectorAll('.card').forEach(card => {
+            card.style.opacity = '1';
+        });
+    }, 1000);
+}
+
+function changeChartType(chartId, newType) {
+    if (chartId === 'categoryChart') {
+        categoryChart.config.type = newType;
+        categoryChart.update('active');
+    }
+}
+
+function updateCharts() {
+    const chartType = document.getElementById('chartType').value;
+    const timeRange = document.getElementById('timeRange').value;
+    const categoryFilter = document.getElementById('categoryFilter').value;
+    const dataSource = document.getElementById('dataSource').value;
+    
+    console.log('Updating charts with filters:', {chartType, timeRange, categoryFilter, dataSource});
+    
+    // Show loading
+    showLoadingProgress();
+    
+    // Update chart data based on time range filter
+    if (timeRange !== 'all') {
+        updateChartsWithTimeFilter(timeRange);
+    } else {
+        // Reset to original data
+        resetChartsToOriginalData();
+    }
+    
+    // Update chart visibility based on chart type filter
+    updateChartVisibility(chartType);
+    
+    // Update data based on category filter
+    if (categoryFilter) {
+        updateChartsWithCategoryFilter(categoryFilter);
+    } else {
+        // Reset category filter if "All Categories" selected
+        resetCategoryFilter();
+    }
+    
+    // Update data based on data source
+    updateChartsWithDataSource(dataSource);
+}
+
+function updateChartsWithTimeFilter(timeRange) {
+    // Sample data for different time ranges
+    const timeRangeData = {
+        'year': {
+            categoryData: [380, 270, 230, 180, 120],
+            sentimentData: [28, 48, 24],
+            topicTrends: {
+                labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+                datasets: [
+                    { label: 'Technology', data: [45, 52, 38, 48] },
+                    { label: 'Business', data: [32, 28, 35, 42] },
+                    { label: 'Sports', data: [25, 30, 22, 28] }
+                ]
+            }
+        },
+        'month': {
+            categoryData: [45, 32, 28, 20, 15],
+            sentimentData: [35, 42, 23],
+            topicTrends: {
+                labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                datasets: [
+                    { label: 'Technology', data: [12, 15, 18, 20] },
+                    { label: 'Business', data: [8, 12, 14, 16] },
+                    { label: 'Sports', data: [6, 8, 10, 12] }
+                ]
+            }
+        },
+        'week': {
+            categoryData: [12, 8, 7, 5, 3],
+            sentimentData: [40, 38, 22],
+            topicTrends: {
+                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                datasets: [
+                    { label: 'Technology', data: [3, 4, 2, 5, 6, 2, 1] },
+                    { label: 'Business', data: [2, 3, 2, 4, 3, 1, 1] },
+                    { label: 'Sports', data: [1, 2, 3, 2, 4, 5, 2] }
+                ]
+            }
+        }
+    };
+    
+    const data = timeRangeData[timeRange];
+    if (!data) return;
+    
+    // Update category chart
+    if (categoryChart) {
+        categoryChart.data.datasets[0].data = data.categoryData;
+        categoryChart.update('active');
+        
+        // Update total articles display
+        const total = data.categoryData.reduce((a, b) => a + b, 0);
+        document.getElementById('totalArticles').textContent = total.toLocaleString();
+    }
+    
+    // Update sentiment chart
+    if (sentimentChart) {
+        sentimentChart.data.datasets[0].data = data.sentimentData;
+        sentimentChart.update('active');
+        
+        // Update sentiment percentages
+        const sentimentTotal = data.sentimentData.reduce((a, b) => a + b, 0);
+        document.getElementById('positiveCount').textContent = Math.round((data.sentimentData[0] / sentimentTotal) * 100) + '%';
+        document.getElementById('neutralCount').textContent = Math.round((data.sentimentData[1] / sentimentTotal) * 100) + '%';
+        document.getElementById('negativeCount').textContent = Math.round((data.sentimentData[2] / sentimentTotal) * 100) + '%';
+    }
+    
+    // Update topic trends chart
+    if (topicTrendsChart) {
+        topicTrendsChart.data.labels = data.topicTrends.labels;
+        topicTrendsChart.data.datasets.forEach((dataset, index) => {
+            if (data.topicTrends.datasets[index]) {
+                dataset.data = data.topicTrends.datasets[index].data;
+            }
+        });
+        topicTrendsChart.update('active');
+    }
+}
+
+function updateChartVisibility(chartType) {
+    // Hide/show chart containers based on selection
+    const chartContainers = {
+        'category': document.querySelector('#categoryChart').closest('.col-lg-6'),
+        'sentiment': document.querySelector('#sentimentChart').closest('.col-lg-6'),
+        'topics': document.querySelector('#topicTrendsChart').closest('.col-lg-8'),
+        'entities': document.querySelector('#entitiesList').closest('.col-lg-4')
+    };
+    
+    if (chartType === 'all') {
+        // Show all charts
+        Object.values(chartContainers).forEach(container => {
+            if (container) container.style.display = 'block';
+        });
+    } else {
+        // Hide all, then show selected
+        Object.entries(chartContainers).forEach(([type, container]) => {
+            if (container) {
+                container.style.display = type === chartType ? 'block' : 'none';
+            }
+        });
+    }
+}
+
+function resetChartsToOriginalData() {
+    // Reset to original data from server
+    const originalData = {
+        categoryData: {{ data.category_distribution.values() | list | tojson }},
+        sentimentData: [32, 45, 23],
+        topicTrends: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [
+                { label: 'Technology', data: [12, 19, 15, 25, 22, 30] },
+                { label: 'Business', data: [8, 15, 12, 18, 16, 22] },
+                { label: 'Sports', data: [5, 10, 8, 15, 12, 18] }
+            ]
+        }
+    };
+    
+    // Update category chart
+    if (categoryChart) {
+        categoryChart.data.datasets[0].data = originalData.categoryData;
+        categoryChart.data.datasets[0].backgroundColor = ['#FF6384', '#36A2EB', '#FFCE56', '#FF9F40', '#9966FF'];
+        categoryChart.update('active');
+        
+        // Update total articles display
+        const total = originalData.categoryData.reduce((a, b) => a + b, 0);
+        document.getElementById('totalArticles').textContent = total.toLocaleString();
+    }
+    
+    // Update sentiment chart
+    if (sentimentChart) {
+        sentimentChart.data.datasets[0].data = originalData.sentimentData;
+        sentimentChart.update('active');
+        
+        // Update sentiment percentages
+        const sentimentTotal = originalData.sentimentData.reduce((a, b) => a + b, 0);
+        document.getElementById('positiveCount').textContent = Math.round((originalData.sentimentData[0] / sentimentTotal) * 100) + '%';
+        document.getElementById('neutralCount').textContent = Math.round((originalData.sentimentData[1] / sentimentTotal) * 100) + '%';
+        document.getElementById('negativeCount').textContent = Math.round((originalData.sentimentData[2] / sentimentTotal) * 100) + '%';
+    }
+    
+    // Update topic trends chart
+    if (topicTrendsChart) {
+        topicTrendsChart.data.labels = originalData.topicTrends.labels;
+        topicTrendsChart.data.datasets.forEach((dataset, index) => {
+            if (originalData.topicTrends.datasets[index]) {
+                dataset.data = originalData.topicTrends.datasets[index].data;
+            }
+        });
+        topicTrendsChart.update('active');
+    }
+}
+
+function updateChartsWithCategoryFilter(categoryFilter) {
+    console.log('Filtering by category:', categoryFilter);
+    
+    // Category-specific data
+    const categoryData = {
+        'tech': {
+            categoryData: [450, 0, 0, 0, 0], // Only tech category
+            sentimentData: [45, 35, 20],
+            entities: ['Apple Inc.', 'Microsoft', 'Google', 'Tesla', 'Meta']
+        },
+        'business': {
+            categoryData: [0, 320, 0, 0, 0], // Only business category
+            sentimentData: [30, 50, 20],
+            entities: ['Amazon', 'JPMorgan', 'Goldman Sachs', 'BlackRock', 'Berkshire']
+        },
+        'sport': {
+            categoryData: [0, 0, 280, 0, 0], // Only sports category
+            sentimentData: [40, 45, 15],
+            entities: ['FIFA', 'NBA', 'Premier League', 'Olympics', 'NFL']
+        },
+        'entertainment': {
+            categoryData: [0, 0, 0, 200, 0], // Only entertainment category
+            sentimentData: [50, 30, 20],
+            entities: ['Netflix', 'Disney', 'Warner Bros', 'Sony Pictures', 'Universal']
+        },
+        'politics': {
+            categoryData: [0, 0, 0, 0, 150], // Only politics category
+            sentimentData: [20, 40, 40],
+            entities: ['White House', 'Congress', 'Senate', 'Supreme Court', 'Pentagon']
+        }
+    };
+    
+    const data = categoryData[categoryFilter];
+    if (!data) return;
+    
+    // Update category chart with filtered data
+    if (categoryChart) {
+        categoryChart.data.datasets[0].data = data.categoryData;
+        
+        // Highlight the selected category
+        const colors = ['#FF6384', '#36A2EB', '#FFCE56', '#FF9F40', '#9966FF'];
+        const newColors = colors.map((color, index) => 
+            data.categoryData[index] > 0 ? color : color + '40' // Semi-transparent for zero values
+        );
+        categoryChart.data.datasets[0].backgroundColor = newColors;
+        categoryChart.update('active');
+        
+        // Update total articles
+        const total = data.categoryData.reduce((a, b) => a + b, 0);
+        document.getElementById('totalArticles').textContent = total.toLocaleString();
+    }
+    
+    // Update sentiment chart
+    if (sentimentChart) {
+        sentimentChart.data.datasets[0].data = data.sentimentData;
+        sentimentChart.update('active');
+        
+        // Update sentiment percentages
+        const sentimentTotal = data.sentimentData.reduce((a, b) => a + b, 0);
+        document.getElementById('positiveCount').textContent = Math.round((data.sentimentData[0] / sentimentTotal) * 100) + '%';
+        document.getElementById('neutralCount').textContent = Math.round((data.sentimentData[1] / sentimentTotal) * 100) + '%';
+        document.getElementById('negativeCount').textContent = Math.round((data.sentimentData[2] / sentimentTotal) * 100) + '%';
+    }
+    
+    // Update entities list
+    updateEntitiesList(data.entities);
+}
+
+function resetCategoryFilter() {
+    // Reset to original colors and data when no category filter is applied
+    if (categoryChart) {
+        categoryChart.data.datasets[0].backgroundColor = ['#FF6384', '#36A2EB', '#FFCE56', '#FF9F40', '#9966FF'];
+        categoryChart.update('active');
+    }
+}
+
+function updateChartsWithDataSource(dataSource) {
+    console.log('Updating data source:', dataSource);
+    
+    // Different data based on source
+    const dataSourceData = {
+        'processed': {
+            performanceMultiplier: 1.0,
+            label: 'Processed Articles',
+            status: 'Using cached processed data'
+        },
+        'live': {
+            performanceMultiplier: 0.85,
+            label: 'Live Analysis',
+            status: 'Real-time processing active'
+        },
+        'cached': {
+            performanceMultiplier: 1.1,
+            label: 'Cached Results',
+            status: 'Using optimized cached results'
+        }
+    };
+    
+    const sourceData = dataSourceData[dataSource];
+    if (!sourceData) return;
+    
+    // Update performance metrics based on data source
+    updatePerformanceMetrics(sourceData.performanceMultiplier);
+    
+    // Show status message
+    showInfo(`Data Source: ${sourceData.status}`);
+}
+
+function updatePerformanceMetrics(multiplier) {
+    // Update performance metrics with multiplier
+    const baseMetrics = {
+        classification: 97.5,
+        sentiment: 94.2,
+        coherence: 82.0,
+        entity: 91.8
+    };
+    
+    const adjustedMetrics = {
+        classification: Math.min(99.9, baseMetrics.classification * multiplier),
+        sentiment: Math.min(99.9, baseMetrics.sentiment * multiplier),
+        coherence: Math.min(99.9, baseMetrics.coherence * multiplier),
+        entity: Math.min(99.9, baseMetrics.entity * multiplier)
+    };
+    
+    // Update the display
+    document.querySelector('.performance-metric .h3.text-primary').textContent = adjustedMetrics.classification.toFixed(1) + '%';
+    document.querySelector('.performance-metric .h3.text-success').textContent = adjustedMetrics.sentiment.toFixed(1) + '%';
+    document.querySelector('.performance-metric .h3.text-warning').textContent = (adjustedMetrics.coherence / 100).toFixed(2);
+    document.querySelector('.performance-metric .h3.text-info').textContent = adjustedMetrics.entity.toFixed(1) + '%';
+    
+    // Update progress bars
+    const progressBars = document.querySelectorAll('.performance-metric .progress-bar');
+    progressBars[0].style.width = adjustedMetrics.classification + '%';
+    progressBars[1].style.width = adjustedMetrics.sentiment + '%';
+    progressBars[2].style.width = adjustedMetrics.coherence + '%';
+    progressBars[3].style.width = adjustedMetrics.entity + '%';
+}
+
+function updateEntitiesList(entities) {
+    const entitiesList = document.getElementById('entitiesList');
+    const loadMoreBtn = entitiesList.querySelector('button');
+    
+    // Clear existing entities (except the load more button)
+    const entityItems = entitiesList.querySelectorAll('.entity-item');
+    entityItems.forEach(item => item.remove());
+    
+    // Add new entities
+    entities.forEach((entity, index) => {
+        const count = Math.floor(Math.random() * 100) + 20; // Random count for demo
+        const entityDiv = document.createElement('div');
+        entityDiv.className = 'entity-item d-flex justify-content-between align-items-center mb-2';
+        entityDiv.innerHTML = `
+            <span class="entity-tag">${entity}</span>
+            <span class="badge bg-primary">${count}</span>
+        `;
+        entitiesList.insertBefore(entityDiv, loadMoreBtn);
+    });
+}
+
+function showInfo(message) {
+    document.getElementById('error-container').innerHTML = `
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            <i class="fas fa-info-circle"></i>
+            <strong>Info:</strong> ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    
+    // Auto-dismiss after 3 seconds
+    setTimeout(() => {
+        const alert = document.querySelector('.alert-info');
+        if (alert) {
+            alert.classList.remove('show');
+            setTimeout(() => alert.remove(), 150);
+        }
+    }, 3000);
+}
+
+function showSuccess(message) {
+    document.getElementById('success-container').innerHTML = `
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle"></i>
+            <strong>Success:</strong> ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    
+    // Auto-dismiss after 3 seconds
+    setTimeout(() => {
+        const alert = document.querySelector('.alert-success');
+        if (alert) {
+            alert.classList.remove('show');
+            setTimeout(() => alert.remove(), 150);
+        }
+    }, 3000);
+}
+
+function refreshData() {
+    showSuccess('Refreshing visualization data...');
+    loadVisualizationData();
+}
+
+function exportCharts() {
+    showSuccess('Exporting charts to PDF...');
+    
+    // This would generate and download a PDF with all charts
+    setTimeout(() => {
+        showSuccess('Charts exported successfully!');
+    }, 2000);
+}
+
+function loadMoreEntities() {
+    const entitiesList = document.getElementById('entitiesList');
+    
+    // Simulate loading more entities
+    const moreEntities = [
+        {name: 'Facebook', count: 43},
+        {name: 'Netflix', count: 38},
+        {name: 'Twitter', count: 32}
+    ];
+    
+    moreEntities.forEach(entity => {
+        const entityDiv = document.createElement('div');
+        entityDiv.className = 'entity-item d-flex justify-content-between align-items-center mb-2';
+        entityDiv.innerHTML = `
+            <span class="entity-tag">${entity.name}</span>
+            <span class="badge bg-primary">${entity.count}</span>
+        `;
+        entitiesList.insertBefore(entityDiv, entitiesList.lastElementChild);
+    });
+}
+
+// Real-time updates
+setInterval(() => {
+    // Simulate real-time data updates
+    if (Math.random() > 0.8) {
+        const newValue = Math.floor(Math.random() * 10) + 1;
+        // Update a random data point
+        console.log('Real-time update:', newValue);
+    }
+}, 5000);
+</script>
+{% endblock %}

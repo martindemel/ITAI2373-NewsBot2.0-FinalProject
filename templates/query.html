@@ -1,0 +1,421 @@
+{% extends "base.html" %}
+
+{% block title %}AI Chat Interface - NewsBot 2.0{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">
+        <i class="fas fa-comments"></i> AI Chat Interface
+    </h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="clearChat()">
+            <i class="fas fa-trash"></i> Clear Chat
+        </button>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Chat Interface -->
+    <div class="col-md-9">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-robot"></i> NewsBot AI Assistant
+                </h5>
+                <span class="badge bg-success">Online</span>
+            </div>
+            <div class="card-body">
+                <!-- Chat Messages -->
+                <div id="chatMessages" class="chat-messages mb-3" style="height: 700px; overflow-y: auto; border: 1px solid #dee2e6; padding: 1rem; border-radius: 0.375rem;">
+                    <div class="message-item bot-message mb-3">
+                        <div class="d-flex align-items-start">
+                            <div class="avatar bg-primary text-white rounded-circle me-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <div class="message-content">
+                                <div class="message-bubble bg-light p-3 rounded">
+                                    <p class="mb-0">👋 Hello! I'm your AI-powered NewsBot assistant, ready to help with intelligent news analysis.</p>
+                                    <p class="mb-0 mt-2">🧠 <strong>AI Capabilities</strong>: Advanced ML models for sentiment analysis, entity extraction, topic modeling, and semantic search.</p>
+                                    <p class="mb-0 mt-2">💡 <strong>Try asking</strong>: "Find positive tech news", "Extract entities from politics articles", or "Analyze sentiment of business news"</p>
+                                </div>
+                                <small class="text-muted">Just now</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Chat Input -->
+                <form id="chatForm">
+                    <div class="input-group">
+                        <input 
+                            type="text" 
+                            class="form-control" 
+                            id="chatInput" 
+                            placeholder="Ask me anything about news analysis..."
+                            autocomplete="off">
+                        <button class="btn btn-primary" type="submit" id="sendButton">
+                            <i class="fas fa-paper-plane"></i> Send
+                        </button>
+                    </div>
+                </form>
+                
+                <!-- Typing Indicator -->
+                <div id="typingIndicator" class="typing-indicator mt-2" style="display: none;">
+                    <small class="text-muted">
+                        <i class="fas fa-circle-notch fa-spin"></i> NewsBot is thinking...
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions & Help -->
+    <div class="col-md-3">
+        <!-- Quick Query Examples -->
+        <div class="card mb-3">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-lightbulb"></i> Quick Queries
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-primary btn-sm" onclick="sendQuickQuery('Find 5 positive tech articles')">
+                        Find positive tech articles
+                    </button>
+                    <button class="btn btn-outline-success btn-sm" onclick="sendQuickQuery('Analyze sentiment of business news')">
+                        Analyze business sentiment
+                    </button>
+                    <button class="btn btn-outline-info btn-sm" onclick="sendQuickQuery('Summarize recent sports news')">
+                        Summarize sports news
+                    </button>
+                    <button class="btn btn-outline-warning btn-sm" onclick="sendQuickQuery('Extract entities from politics articles')">
+                        Extract political entities
+                    </button>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="sendQuickQuery('Show me trending topics')">
+                        Show trending topics
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Advanced Features -->
+        <div class="card mb-3">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-cogs"></i> Advanced Features
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="feature-list">
+                    <div class="feature-item mb-2">
+                        <i class="fas fa-brain text-primary"></i>
+                        <strong>Semantic Search</strong><br>
+                        <small class="text-muted">Find articles by meaning, not just keywords</small>
+                    </div>
+                    <div class="feature-item mb-2">
+                        <i class="fas fa-language text-success"></i>
+                        <strong>Multilingual</strong><br>
+                        <small class="text-muted">Analyze news in 50+ languages</small>
+                    </div>
+                    <div class="feature-item mb-2">
+                        <i class="fas fa-chart-line text-warning"></i>
+                        <strong>Trend Analysis</strong><br>
+                        <small class="text-muted">Discover emerging themes and patterns</small>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-robot text-info"></i>
+                        <strong>AI-Powered</strong><br>
+                        <small class="text-muted">Powered by OpenAI and transformers</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Query Statistics -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-chart-bar"></i> Session Statistics
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6">
+                        <div class="stat-item">
+                            <div class="stat-number h4 mb-0" id="queryCount">0</div>
+                            <small class="text-muted">Queries</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="stat-item">
+                            <div class="stat-number h4 mb-0" id="avgResponseTime">0</div>
+                            <small class="text-muted">Avg. Time (s)</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let queryCount = 0;
+let totalResponseTime = 0;
+
+// Chat form submission
+document.getElementById('chatForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const input = document.getElementById('chatInput');
+    const query = input.value.trim();
+    
+    if (!query) {
+        return;
+    }
+    
+    sendQuery(query);
+    input.value = '';
+});
+
+function sendQuery(query) {
+    // Add user message to chat
+    addMessage(query, 'user');
+    
+    // Show typing indicator
+    showTypingIndicator();
+    
+    // Record start time
+    const startTime = Date.now();
+    
+    // Send query to backend
+    fetch('/query', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ query: query })
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideTypingIndicator();
+        
+        // Calculate response time
+        const responseTime = (Date.now() - startTime) / 1000;
+        updateStatistics(responseTime);
+        
+        if (data.error) {
+            addMessage('Sorry, I encountered an error: ' + data.error, 'bot', 'error');
+            return;
+        }
+        
+        // Add bot response to chat - Handle advanced NLP responses
+        let response = 'I processed your query successfully.';
+        
+        // Check for different response formats from advanced NLP system
+        if (data.message) {
+            response = data.message;
+        } else if (data.response) {
+            // Response from advanced response generator
+            response = data.response;
+        } else if (data.status === 'success' && data.intent) {
+            // Format based on intent and results
+            response = formatAdvancedResponse(data);
+        } else if (data.query_results && data.query_results.message) {
+            response = data.query_results.message;
+        }
+        
+        addMessage(response, 'bot', 'success', data);
+    })
+    .catch(error => {
+        hideTypingIndicator();
+        addMessage('Sorry, I\'m having trouble connecting. Please try again.', 'bot', 'error');
+        console.error('Error:', error);
+    });
+}
+
+function addMessage(content, sender, type = 'normal', metadata = null) {
+    const chatMessages = document.getElementById('chatMessages');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message-item ${sender}-message mb-3`;
+    
+    const timestamp = new Date().toLocaleTimeString();
+    const isBot = sender === 'bot';
+    const avatar = isBot ? '<i class="fas fa-robot"></i>' : '<i class="fas fa-user"></i>';
+    const avatarClass = isBot ? 'bg-primary' : 'bg-secondary';
+    
+    let messageTypeClass = 'bg-light';
+    if (type === 'error') messageTypeClass = 'bg-danger text-white';
+    else if (type === 'success') messageTypeClass = 'bg-light';
+    
+    let metadataHtml = '';
+    if (metadata && isBot) {
+        metadataHtml = `
+            <div class="message-metadata mt-2 p-2 bg-white rounded border">
+                <small class="text-muted">
+                    ${metadata.intent ? `Intent: ${metadata.intent} | ` : ''}
+                    ${metadata.confidence ? `Confidence: ${(metadata.confidence * 100).toFixed(1)}% | ` : ''}
+                    ${metadata.processing_time ? `Time: ${metadata.processing_time.toFixed(2)}s` : ''}
+                </small>
+            </div>
+        `;
+    }
+    
+    messageDiv.innerHTML = `
+        <div class="d-flex align-items-start">
+            <div class="avatar ${avatarClass} text-white rounded-circle me-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                ${avatar}
+            </div>
+            <div class="message-content">
+                <div class="message-bubble ${messageTypeClass} p-3 rounded">
+                    ${content.replace(/\n/g, '<br>')}
+                </div>
+                ${metadataHtml}
+                <small class="text-muted">${timestamp}</small>
+            </div>
+        </div>
+    `;
+    
+    chatMessages.appendChild(messageDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function formatAdvancedResponse(data) {
+    // Format sophisticated ML-generated responses based on intent
+    const intent = data.intent || 'unknown';
+    const confidence = data.confidence || 0;
+    
+    // Handle different intents with proper natural language responses
+    if (intent === 'search_articles' && data.articles) {
+        const articleCount = data.articles.length;
+        let response = `📰 Found ${articleCount} articles:\n\n`;
+        
+        data.articles.slice(0, 3).forEach((article, index) => {
+            const category = article.category || 'UNKNOWN';
+            const title = article.title || article.text?.substring(0, 50) + '...';
+            response += `${index + 1}. [${category.toUpperCase()}] ${title}\n`;
+        });
+        
+        response += `\n🔍 Categories: ${[...new Set(data.articles.map(a => a.category))].join(', ')}`;
+        response += `\n💬 Ask me to 'analyze sentiment' or 'summarize these articles' for deeper insights!`;
+        
+        return response;
+    }
+    
+    if (intent === 'summarize_text' && (data.summary || data.summaries)) {
+        const articles = data.articles || [];
+        const articleCount = articles.length;
+        
+        let response = `📝 Summary of articles about '${data.query}':\n\n`;
+        
+        if (data.summaries && data.summaries.length > 0) {
+            data.summaries.slice(0, 3).forEach((summary, index) => {
+                const category = summary.category || 'UNKNOWN';
+                response += `${index + 1}. [${category.toUpperCase()}] ${summary.title || summary.text?.substring(0, 50)}...\n`;
+                response += `Summary: ${summary.summary || summary.extractive_summary || 'Summary not available'}\n\n`;
+            });
+        }
+        
+        response += `📋 Key themes: Based on ${articleCount} articles, the main topics cover current developments in this area.`;
+        
+        return response;
+    }
+    
+    if (intent === 'analyze_sentiment' && data.sentiment_results) {
+        const sentimentData = data.sentiment_results;
+        const avgSentiment = sentimentData.average_sentiment || 'neutral';
+        const confidence = sentimentData.confidence || 0.5;
+        
+        return `😊 Sentiment Analysis Results:\n\n` +
+               `Overall Sentiment: ${avgSentiment.toUpperCase()} (${(confidence * 100).toFixed(1)}% confidence)\n` +
+               `Articles Analyzed: ${sentimentData.total_articles || 0}\n` +
+               `Positive: ${sentimentData.positive_count || 0} | Neutral: ${sentimentData.neutral_count || 0} | Negative: ${sentimentData.negative_count || 0}`;
+    }
+    
+    if (intent === 'extract_entities' && data.entities) {
+        let response = `🏷️ Entity Analysis Results:\n\n`;
+        
+        for (const [entityType, entities] of Object.entries(data.entities)) {
+            if (entities && entities.length > 0) {
+                response += `${entityType.toUpperCase()}: ${entities.slice(0, 5).join(', ')}\n`;
+            }
+        }
+        
+        return response || '🏷️ No specific entities found in the query context.';
+    }
+    
+    // Fallback for other intents
+    if (data.articles && data.articles.length > 0) {
+        return `🤖 I found ${data.articles.length} relevant articles. ` +
+               `The analysis shows content related to your query about "${data.query}". ` +
+               `You can ask me to analyze sentiment, extract entities, or provide summaries for more insights!`;
+    }
+    
+    // Generic intelligent response
+    return `🤖 I understand you're asking about '${data.query}'. I can help you with:\n\n` +
+           `🔍 Search: 'Find articles about [topic]'\n` +
+           `🎭 Sentiment: 'Analyze sentiment of [topic] news'\n` +
+           `📝 Summary: 'Summarize [topic] articles'\n` +
+           `🏷️ Classification: 'Classify news by category'\n` +
+           `🌍 Translation: 'Translate [text] to [language]'\n\n` +
+           `💡 Try asking: 'Find positive tech news from this week'`;
+}
+
+function sendQuickQuery(query) {
+    document.getElementById('chatInput').value = query;
+    sendQuery(query);
+}
+
+function showTypingIndicator() {
+    document.getElementById('typingIndicator').style.display = 'block';
+    document.getElementById('sendButton').disabled = true;
+}
+
+function hideTypingIndicator() {
+    document.getElementById('typingIndicator').style.display = 'none';
+    document.getElementById('sendButton').disabled = false;
+}
+
+function updateStatistics(responseTime) {
+    queryCount++;
+    totalResponseTime += responseTime;
+    
+    document.getElementById('queryCount').textContent = queryCount;
+    document.getElementById('avgResponseTime').textContent = (totalResponseTime / queryCount).toFixed(1);
+}
+
+function clearChat() {
+    const chatMessages = document.getElementById('chatMessages');
+    chatMessages.innerHTML = `
+        <div class="message-item bot-message mb-3">
+            <div class="d-flex align-items-start">
+                <div class="avatar bg-primary text-white rounded-circle me-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="message-content">
+                    <div class="message-bubble bg-light p-3 rounded">
+                        <p class="mb-0">Chat cleared! How can I help you analyze news today?</p>
+                    </div>
+                    <small class="text-muted">Just now</small>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Reset statistics
+    queryCount = 0;
+    totalResponseTime = 0;
+    updateStatistics(0);
+}
+
+// Enable Enter key to send message
+document.getElementById('chatInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        document.getElementById('chatForm').dispatchEvent(new Event('submit'));
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,28 @@
+{
+  "training_date": "2025-08-07T12:10:32.833099",
+  "dataset_size": 2225,
+  "categories": {
+    "sport": 511,
+    "business": 510,
+    "politics": 417,
+    "tech": 401,
+    "entertainment": 386
+  },
+  "model_type": "NewsBot 2.0 Advanced Classification",
+  "features": "TF-IDF + Custom Features",
+  "validation_split": 0.2,
+  "training_results": {
+    "best_accuracy": 0.9865168539325843,
+    "training_timestamp": "2025-08-07T12:08:57.049602",
+    "classes": [
+      "business",
+      "entertainment",
+      "politics",
+      "sport",
+      "tech"
+    ],
+    "num_features": 5000,
+    "num_samples": 2225,
+    "best_model": "svm"
+  }
+}

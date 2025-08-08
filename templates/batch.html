@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block title %}Batch Processing - NewsBot 2.0{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">
+        <i class="fas fa-layer-group"></i> Batch Processing
+    </h1>
+</div>
+
+<div id="error-container"></div>
+<div id="success-container"></div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-upload"></i> Batch Article Analysis
+                </h5>
+            </div>
+            <div class="card-body">
+                <form id="batchForm" enctype="multipart/form-data">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="batchFile" class="form-label">Upload Articles File</label>
+                                <input type="file" class="form-control" id="batchFile" name="file" accept=".txt,.csv">
+                                <div class="form-text">
+                                    Upload a text file with articles separated by double newlines, or a CSV file.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="batchText" class="form-label">Or Paste Articles</label>
+                                <textarea class="form-control" id="batchText" name="articles" rows="5" 
+                                    placeholder="Paste multiple articles here, separated by double newlines..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-cogs"></i> Process Batch
+                        </button>
+                    </div>
+                </form>
+                
+                <div id="loadingSpinner" class="text-center py-4 loading-spinner">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Processing...</span>
+                    </div>
+                    <p class="mt-2">Processing articles with advanced NLP models...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="resultsContainer" class="mt-4" style="display: none;">
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-chart-bar"></i> Batch Results
+            </h5>
+        </div>
+        <div class="card-body">
+            <div id="batchSummary" class="mb-3"></div>
+            <div class="table-responsive">
+                <table class="table table-striped" id="resultsTable">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Preview</th>
+                            <th>Category</th>
+                            <th>Sentiment</th>
+                            <th>Words</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('batchForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    
+    showLoading('loadingSpinner');
+    document.getElementById('resultsContainer').style.display = 'none';
+    
+    fetch('/batch', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideLoading('loadingSpinner');
+        
+        if (data.error) {
+            showError(data.error);
+            return;
+        }
+        
+        displayBatchResults(data);
+        showSuccess(`Successfully processed ${data.total_processed} articles!`);
+    })
+    .catch(error => {
+        hideLoading('loadingSpinner');
+        showError('Error processing batch: ' + error.message);
+    });
+});
+
+function displayBatchResults(data) {
+    // Summary
+    document.getElementById('batchSummary').innerHTML = `
+        <div class="row">
+            <div class="col-md-3">
+                <div class="text-center">
+                    <div class="h3 text-primary">${data.total_processed}</div>
+                    <div class="text-muted">Articles Processed</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="text-center">
+                    <div class="h3 text-success">${data.results.filter(r => r.sentiment.label === 'positive').length}</div>
+                    <div class="text-muted">Positive</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="text-center">
+                    <div class="h3 text-danger">${data.results.filter(r => r.sentiment.label === 'negative').length}</div>
+                    <div class="text-muted">Negative</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="text-center">
+                    <div class="h3 text-secondary">${data.results.filter(r => r.sentiment.label === 'neutral').length}</div>
+                    <div class="text-muted">Neutral</div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Results table
+    const tbody = document.getElementById('resultsTableBody');
+    tbody.innerHTML = '';
+    
+    data.results.forEach(result => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${result.id}</td>
+            <td>${result.text_preview}</td>
+            <td><span class="badge bg-primary">${result.classification.category || result.classification.predicted_category || 'Unknown'}</span></td>
+            <td>${formatSentiment(result.sentiment)}</td>
+            <td>${result.word_count}</td>
+        `;
+        tbody.appendChild(row);
+    });
+    
+    document.getElementById('resultsContainer').style.display = 'block';
+}
+</script>
+{% endblock %}

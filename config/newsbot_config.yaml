@@ -1,0 +1,59 @@
+# NewsBot 2.0 Configuration File
+# This file provides default settings for the NewsBot system
+# Environment variables will override these settings
+
+# API Configuration
+api:
+  openai_api_key: null  # Set via OPENAI_API_KEY environment variable
+  google_translate_api_key: null
+  azure_translate_key: null
+  huggingface_api_key: null
+  api_timeout: 30
+
+# Database Configuration  
+database:
+  data_path: "data/processed/newsbot_dataset.csv"
+  models_path: "data/models/"
+  results_path: "data/results/"
+  backup_path: "data/backups/"
+
+# Model Configuration
+model:
+  classification_model: "svm"
+  topic_model_algorithm: "lda"
+  sentiment_model: "roberta"
+  ner_model: "bert"
+  embedding_model: "sentence-transformers"
+  device: "auto"  # auto, cpu, cuda, mps
+  batch_size: 32
+  max_sequence_length: 512
+
+# System Configuration
+system:
+  debug: false
+  log_level: "INFO"
+  auto_load_models: true
+  model_cache: true
+  performance_monitoring: true
+
+# Web Configuration
+web:
+  host: "0.0.0.0"
+  port: 5000
+  secret_key: "newsbot-2-0-default-secret"  # Override with SECRET_KEY env var
+  flask_debug: false
+  enable_cors: true
+  enable_security_headers: true
+  max_content_length: 16777216  # 16MB
+
+# Real-time Configuration
+realtime:
+  enabled: true
+  update_interval: 30  # seconds
+  max_feeds: 10
+  max_articles_per_feed: 50
+  feeds:
+    - "https://feeds.reuters.com/reuters/topNews"
+    - "https://rss.cnn.com/rss/edition.rss"
+    - "https://feeds.bbci.co.uk/news/world/rss.xml"
+

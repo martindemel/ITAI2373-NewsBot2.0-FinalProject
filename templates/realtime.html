@@ -1,0 +1,514 @@
+{% extends "base.html" %}
+
+{% block title %}Real-Time News Monitoring - NewsBot 2.0{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">
+        <i class="fas fa-satellite-dish text-primary"></i> Real-Time News Monitoring
+        <span class="badge bg-success ms-2">Advanced Research Feature</span>
+    </h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <button type="button" class="btn btn-sm btn-success" id="startMonitoring">
+            <i class="fas fa-play"></i> Start Monitoring
+        </button>
+        <button type="button" class="btn btn-sm btn-danger ms-2" id="stopMonitoring" disabled>
+            <i class="fas fa-stop"></i> Stop Monitoring
+        </button>
+        <button type="button" class="btn btn-sm btn-outline-secondary ms-2" onclick="refreshStats()">
+            <i class="fas fa-sync-alt"></i> Refresh
+        </button>
+    </div>
+</div>
+
+<!-- System Status -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-info-circle"></i> System Status</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="d-flex align-items-center">
+                            <div class="status-indicator me-2" id="systemStatus">
+                                <i class="fas fa-circle text-success"></i>
+                            </div>
+                            <div>
+                                <div class="text-muted small">System Status</div>
+                                <div class="fw-bold" id="statusText">Ready</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-muted small">Articles Processed</div>
+                        <div class="fw-bold fs-4" id="articlesProcessed">0</div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-muted small">Processing Rate</div>
+                        <div class="fw-bold fs-4" id="processingRate">0 /min</div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-muted small">Running Time</div>
+                        <div class="fw-bold fs-4" id="runningTime">--</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Real-Time Statistics -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-chart-pie"></i> Category Distribution</h6>
+            </div>
+            <div class="card-body">
+                <canvas id="categoryChart" width="400" height="400"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-heart"></i> Sentiment Distribution</h6>
+            </div>
+            <div class="card-body">
+                <canvas id="sentimentChart" width="400" height="400"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-globe"></i> Language Detection</h6>
+            </div>
+            <div class="card-body">
+                <div id="languageList">
+                    <div class="text-muted">No languages detected yet</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Articles Stream -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h6 class="mb-0"><i class="fas fa-stream"></i> Live Article Stream</h6>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="autoRefresh" checked>
+                    <label class="form-check-label" for="autoRefresh">Auto Refresh</label>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="articleStream" style="max-height: 400px; overflow-y: auto;">
+                    <div class="text-muted text-center py-4">
+                        Start monitoring to see real-time articles
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Event Alerts -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-warning text-dark">
+                <h6 class="mb-0"><i class="fas fa-exclamation-triangle"></i> Breaking News Alerts</h6>
+            </div>
+            <div class="card-body">
+                <div id="breakingNews">
+                    <div class="text-muted">No breaking news detected</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h6 class="mb-0"><i class="fas fa-trending-up"></i> Trending Topics</h6>
+            </div>
+            <div class="card-body">
+                <div id="trendingTopics">
+                    <div class="text-muted">No trends detected yet</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Configuration -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-cog"></i> Monitoring Configuration</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <label for="rssFeedsList" class="form-label">RSS Feeds to Monitor</label>
+                        <textarea class="form-control" id="rssFeedsList" rows="4" readonly>https://feeds.bbci.co.uk/news/rss.xml
+https://rss.cnn.com/rss/edition.rss
+https://feeds.reuters.com/reuters/topNews</textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="refreshInterval" class="form-label">Refresh Interval (seconds)</label>
+                            <input type="number" class="form-control" id="refreshInterval" value="30" min="10" max="300">
+                        </div>
+                        <div class="mb-3">
+                            <label for="maxArticles" class="form-label">Max Articles to Display</label>
+                            <input type="number" class="form-control" id="maxArticles" value="50" min="10" max="500">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Real-time monitoring JavaScript - Version 2.0.1 - Updated with proper article display
+console.log('🚀 NewsBot Real-Time JavaScript Loaded - v2.0.1 - ' + new Date().toISOString());
+let monitoringActive = false;
+let refreshInterval;
+let categoryChart, sentimentChart;
+
+// Initialize charts
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🔧 DOM Content Loaded - Initializing NewsBot Real-Time Dashboard');
+    initializeCharts();
+    
+    // Set up event listeners
+    document.getElementById('startMonitoring').addEventListener('click', startMonitoring);
+    document.getElementById('stopMonitoring').addEventListener('click', stopMonitoring);
+    
+    // Auto-refresh toggle
+    document.getElementById('autoRefresh').addEventListener('change', function() {
+        if (this.checked && monitoringActive) {
+            startAutoRefresh();
+        } else {
+            clearInterval(refreshInterval);
+        }
+    });
+});
+
+function initializeCharts() {
+    // Category distribution chart
+    const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+    categoryChart = new Chart(categoryCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Business', 'Entertainment', 'Politics', 'Sport', 'Tech'],
+            datasets: [{
+                data: [0, 0, 0, 0, 0],
+                backgroundColor: [
+                    '#3498db',
+                    '#e74c3c',
+                    '#f39c12',
+                    '#27ae60',
+                    '#9b59b6'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    // Sentiment distribution chart
+    const sentimentCtx = document.getElementById('sentimentChart').getContext('2d');
+    sentimentChart = new Chart(sentimentCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Positive', 'Negative', 'Neutral'],
+            datasets: [{
+                data: [0, 0, 0],
+                backgroundColor: [
+                    '#27ae60',
+                    '#e74c3c',
+                    '#95a5a6'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+}
+
+async function startMonitoring() {
+    try {
+        const response = await fetch('/api/realtime/start', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                rss_feeds: document.getElementById('rssFeedsList').value.split('\n').filter(url => url.trim())
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+            monitoringActive = true;
+            document.getElementById('startMonitoring').disabled = true;
+            document.getElementById('stopMonitoring').disabled = false;
+            document.getElementById('statusText').textContent = 'Monitoring Active';
+            document.getElementById('systemStatus').innerHTML = '<i class="fas fa-circle text-success"></i>';
+            
+            if (document.getElementById('autoRefresh').checked) {
+                startAutoRefresh();
+            }
+            
+            showSuccessMessage('Real-time monitoring started successfully!');
+            addSystemLog('Real-time monitoring started');
+            
+        } else {
+            showErrorMessage('Failed to start monitoring: ' + result.message);
+        }
+        
+    } catch (error) {
+        console.error('Error starting monitoring:', error);
+        showErrorMessage('Error starting monitoring: ' + error.message);
+    }
+}
+
+async function stopMonitoring() {
+    try {
+        // Call stop endpoint
+        const response = await fetch('/api/realtime/stop', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        const result = await response.json();
+        
+        monitoringActive = false;
+        clearInterval(refreshInterval);
+        
+        document.getElementById('startMonitoring').disabled = false;
+        document.getElementById('stopMonitoring').disabled = true;
+        document.getElementById('statusText').textContent = 'Stopped';
+        document.getElementById('systemStatus').innerHTML = '<i class="fas fa-circle text-secondary"></i>';
+        
+        if (result.status === 'success') {
+            showSuccessMessage('Real-time monitoring stopped successfully!');
+            addSystemLog('Real-time monitoring stopped: ' + result.message);
+        } else {
+            showErrorMessage('Failed to stop monitoring: ' + result.message);
+        }
+        
+    } catch (error) {
+        console.error('Error stopping monitoring:', error);
+        showErrorMessage('Error stopping monitoring: ' + error.message);
+    }
+}
+
+function startAutoRefresh() {
+    const interval = parseInt(document.getElementById('refreshInterval').value) * 1000;
+    refreshInterval = setInterval(refreshStats, interval);
+}
+
+async function refreshStats() {
+    if (!monitoringActive) return;
+    
+    try {
+        // Get statistics
+        const statsResponse = await fetch('/api/realtime/stats');
+        const statsData = await statsResponse.json();
+        
+        if (statsData.status === 'success') {
+            updateStatistics(statsData.stats);
+        }
+        
+        // Get recent articles (with cache busting)
+        const timestamp = new Date().getTime();
+        const articlesResponse = await fetch('/api/realtime/articles?limit=' + document.getElementById('maxArticles').value + '&_t=' + timestamp);
+        const articlesData = await articlesResponse.json();
+        
+        if (articlesData.status === 'success') {
+            console.log('Full articles response:', articlesData); // Debug log
+            console.log('First article structure:', articlesData.articles[0]); // Debug log
+            updateArticleStream(articlesData.articles);
+        }
+        
+    } catch (error) {
+        console.error('Error refreshing data:', error);
+    }
+}
+
+function updateStatistics(stats) {
+    // Update counters
+    document.getElementById('articlesProcessed').textContent = stats.articles_processed || 0;
+    document.getElementById('processingRate').textContent = (stats.articles_per_minute || 0).toFixed(1) + ' /min';
+    
+    if (stats.running_time_seconds) {
+        const minutes = Math.floor(stats.running_time_seconds / 60);
+        const seconds = Math.floor(stats.running_time_seconds % 60);
+        document.getElementById('runningTime').textContent = `${minutes}m ${seconds}s`;
+    }
+    
+    // Update category chart
+    if (stats.categories_found && Object.keys(stats.categories_found).length > 0) {
+        const categories = ['business', 'entertainment', 'politics', 'sport', 'tech'];
+        const data = categories.map(cat => stats.categories_found[cat] || 0);
+        categoryChart.data.datasets[0].data = data;
+        categoryChart.update();
+    }
+    
+    // Update sentiment chart
+    if (stats.sentiment_distribution) {
+        const sentimentData = [
+            stats.sentiment_distribution.positive || 0,
+            stats.sentiment_distribution.negative || 0,
+            stats.sentiment_distribution.neutral || 0
+        ];
+        sentimentChart.data.datasets[0].data = sentimentData;
+        sentimentChart.update();
+    }
+    
+    // Update languages
+    if (stats.languages_detected && stats.languages_detected.length > 0) {
+        const languageHtml = stats.languages_detected.map(lang => 
+            `<span class="badge bg-primary me-1">${lang}</span>`
+        ).join('');
+        document.getElementById('languageList').innerHTML = languageHtml;
+    }
+}
+
+function updateArticleStream(articles) {
+    const streamContainer = document.getElementById('articleStream');
+    
+    if (articles.length === 0) {
+        streamContainer.innerHTML = '<div class="text-muted text-center py-4">No articles processed yet</div>';
+        return;
+    }
+    
+    const articlesHtml = articles.slice(0, 20).map((article, index) => {
+        // Debug log for first few articles
+        if (index < 3) {
+            console.log(`Article ${index}:`, article);
+        }
+        
+        // Handle both flat structure (from API) and nested structure (from older code)
+        const title = article.title || article.original?.title || 'No title';
+        const content = article.content || article.original?.content || '';
+        const category = article.category || article.analysis?.category || 'Unknown';
+        const sentiment = article.sentiment || article.analysis?.sentiment || 'Unknown';
+        const language = article.language || article.analysis?.language || 'Unknown';
+        const processed_time = article.processed_time || article.analysis?.processed_time || Date.now();
+        
+        // Debug the extracted values
+        if (index < 3) {
+            console.log(`Extracted - Title: "${title}", Category: "${category}", Sentiment: "${sentiment}"`);
+        }
+        
+        return `
+            <div class="article-item border-bottom py-2">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="flex-grow-1">
+                        <h6 class="mb-1">${title}</h6>
+                        <p class="mb-1 text-muted small">${content.substring(0, 100)}...</p>
+                        <div class="d-flex gap-2">
+                            <span class="badge bg-primary">${category}</span>
+                            <span class="badge bg-${getSentimentColor(sentiment)}">${sentiment}</span>
+                            <span class="badge bg-secondary">${language}</span>
+                        </div>
+                    </div>
+                    <div class="text-muted small">
+                        ${new Date(processed_time).toLocaleTimeString()}
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    streamContainer.innerHTML = articlesHtml;
+}
+
+function getSentimentColor(sentiment) {
+    switch (sentiment) {
+        case 'positive': return 'success';
+        case 'negative': return 'danger';
+        case 'neutral': return 'secondary';
+        default: return 'secondary';
+    }
+}
+
+function addSystemLog(message) {
+    console.log(`[${new Date().toISOString()}] ${message}`);
+}
+
+function showSuccessMessage(message) {
+    // Simple alert for demo - in production, use a toast notification system
+    const alertDiv = document.createElement('div');
+    alertDiv.className = 'alert alert-success alert-dismissible fade show';
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    document.querySelector('.container-fluid').insertBefore(alertDiv, document.querySelector('.container-fluid').firstChild);
+    
+    setTimeout(() => alertDiv.remove(), 5000);
+}
+
+function showErrorMessage(message) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = 'alert alert-danger alert-dismissible fade show';
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    document.querySelector('.container-fluid').insertBefore(alertDiv, document.querySelector('.container-fluid').firstChild);
+    
+    setTimeout(() => alertDiv.remove(), 5000);
+}
+</script>
+
+<style>
+.status-indicator {
+    font-size: 0.8rem;
+}
+
+.article-item:last-child {
+    border-bottom: none !important;
+}
+
+.article-item:hover {
+    background-color: rgba(0,0,0,0.02);
+}
+
+#articleStream {
+    font-size: 0.9rem;
+}
+
+.card-header h6 {
+    font-weight: 600;
+}
+</style>
+{% endblock %}
