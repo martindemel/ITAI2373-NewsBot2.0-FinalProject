@@ -12,10 +12,10 @@ NewsBot 2.0 represents the culmination of advanced NLP learning, transforming fr
 
 ## 👥 Team Members
 
-- **Martin Demel** - Lead Developer & System Architecture
-- **Jiri Musil** - NLP Specialist & Web Interface Development
+- **Martin Demel**
+- **Jiri Musil**
 
-*Collaborative development following professional software engineering practices*
+*Collaborative development following professional software engineering practices with combined efforts across all project components*
 
 ## 🏆 Key Achievements & Metrics
 
@@ -299,26 +299,23 @@ python tests/test_integration.py TestRealDataIntegration
 
 ## 🤝 Team Contributions
 
-### Martin Demel - Lead Developer & System Architecture
-- **System Architecture**: Designed modular, scalable system architecture
-- **Core Implementation**: Led development of classification and analysis modules
-- **Integration**: Coordinated module integration and system orchestration
-- **Documentation**: Technical documentation and API reference
-- **Testing**: Unit testing framework and performance optimization
+This project represents a true collaborative effort between **Martin Demel** and **Jiri Musil**, with both team members contributing equally across all aspects of the NewsBot 2.0 system development.
 
-### Jiri Musil - NLP Specialist & Web Interface Development
-- **Web Application**: Complete Flask application development with modern UI
-- **Advanced NLP**: Transformer model integration and fine-tuning
-- **Conversational AI**: OpenAI integration and chat interface
-- **Visualization**: Interactive dashboards and data visualization components
-- **User Experience**: Interface design and usability optimization
+### Combined Team Achievements
+- **System Architecture & Design**: Collaborative design of modular, scalable system architecture
+- **Full-Stack Development**: Joint development of classification modules, web application, and user interface
+- **Advanced NLP Integration**: Combined efforts in transformer model integration, fine-tuning, and conversational AI
+- **Data Processing & Analysis**: Shared responsibility for data pipeline, feature extraction, and model training
+- **Web Application & Visualization**: Collaborative development of Flask application, interactive dashboards, and modern UI
+- **Documentation & Testing**: Joint effort in comprehensive technical documentation, API reference, and testing framework
+- **Integration & Optimization**: Combined work on module integration, system orchestration, and performance optimization
 
-### Collaborative Achievements
-- **Pair Programming**: Joint development sessions for complex algorithms
-- **Code Review**: Peer review process ensuring code quality
-- **Version Control**: Professional Git workflow with feature branches
-- **Documentation**: Comprehensive technical and user documentation
-- **Testing**: Integrated testing strategy with continuous validation
+### Professional Development Practices
+- **Pair Programming**: Joint development sessions for complex algorithms and system components
+- **Code Review**: Collaborative peer review process ensuring code quality and consistency
+- **Version Control**: Professional Git workflow with shared responsibility for feature development
+- **Quality Assurance**: Integrated testing strategy with continuous validation and optimization
+- **Technical Documentation**: Comprehensive documentation developed through combined expertise
 
 ## 🤝 Contributing
 
@@ -390,4 +387,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [Conversational AI](notebooks/06_Conversational_Interface.ipynb) - Natural language queries
 - [Integration](notebooks/07_System_Integration.ipynb) - Complete system demo
 
-**Built with ❤️ for Advanced NLP Learning**
